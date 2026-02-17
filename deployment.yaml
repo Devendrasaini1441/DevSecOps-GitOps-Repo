@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: swiggy
-          image: YOUR_DOCKERHUB_USERNAME/swiggy:latest
+          image: devsaini1441/swiggy:latest
           ports:
             - containerPort: 80
