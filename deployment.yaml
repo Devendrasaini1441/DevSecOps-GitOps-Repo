@@ -16,6 +16,7 @@ spec:
     spec:
       containers:
         - name: swiggy
-          image: devsaini1441/swiggy:latest
+          image: devsaini1441/swiggy:initial
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
