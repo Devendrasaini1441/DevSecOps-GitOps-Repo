@@ -14,6 +14,7 @@ spec:
       labels:
         app: swiggy
     spec:
+      serviceAccountName: swiggy-sa   
       containers:
         - name: swiggy
           image: devsaini1441/swiggy:5df55b770e3a649cfb9a138372e136914c122c05
