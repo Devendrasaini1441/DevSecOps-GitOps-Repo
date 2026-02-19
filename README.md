@@ -29,9 +29,42 @@ The system follows production-style practices including:
 
 Core Principles:
 
-Git as Single Source of Truth
-Immutable container versioning
-Declarative deployments
-Drift detection & self-healing
-CI-driven automation
+1. Git as Single Source of Truth
+2. Immutable container versioning
+3. Declarative deployments
+4. Drift detection & self-healing
+5. CI-driven automation
+
+## 🛠️ Tech Stack
+
+☁️ Cloud
+1. AWS EC2 (Free Tier)
+2. VPC
+
+☸️ Kubernetes
+
+1. kubeadm (Multi-node cluster)
+2. Calico CNI
+3. NGINX Ingress Controller
+
+🔁 CI/CD
+
+1. GitHub Actions
+2. Docker
+3. DockerHub
+
+🔐 DevSecOps Tools
+
+1. SonarQube (SAST / Code Quality)
+2. Trivy (Container Vulnerability Scan)
+
+🚀 GitOps
+
+1. ArgoCD
+2. Separate GitOps Repository
+
+📊 Monitoring
+
+1. Prometheus
+2. Grafana (kube-prometheus-stack)
 
