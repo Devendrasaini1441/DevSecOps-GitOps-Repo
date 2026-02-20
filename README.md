@@ -151,6 +151,23 @@ Click Associate.
 Ensure the Security Group attached to your Control Plane allows traffic on port 6443 (Kubernetes API) and your NodePorts (like the one for Argo CD or SonarQube) from your specific Elastic IP or your local machine's IP.
 <img width="940" height="418" alt="image" src="https://github.com/user-attachments/assets/2b51200a-7d4f-4c13-a5e6-b59ec0d31dd7" />
 
+### PHASE 2 – Kubernetes Cluster Setup (kubeadm)
+
+#### PART 1 – COMMON SETUP (Run on ALL 3 Nodes)
+SSH into each node one by one
+
+##### Step 1 – Update System
+```
+sudo apt update && sudo apt upgrade -y
+```
+##### Step 2 – Disable Swap (Mandatory)
+Kubernetes will fail if swap is enabled.
+```
+sudo swapoff -a
+```
+
+
+
 
 
 
