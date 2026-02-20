@@ -91,8 +91,11 @@ DevSecOps-GitOps-Repo/
 ### PHASE 1 – Infrastructure Setup (AWS)
 Launch EC2 instances:
 
-1 Control Plane (t3.medium)
-2 Worker Nodes (t3.small)
+<img width="940" height="416" alt="image" src="https://github.com/user-attachments/assets/e797d59b-6d8c-4805-a9bf-5cff5b53ddee" />
+
+1. 1 Control Plane (t3.medium)
+2. 2 Worker Nodes (t3.small)
+3. Storage must bhi 25GB to each node 
 
 Configure Security Groups:
 1. 22 (SSH)
@@ -111,6 +114,46 @@ o	Port range: 0 - 65535
 o	Source: Click the search box and select the ID of the current Security Group (e.g., search for sg- and pick the one you are currently editing).
 5.	Click Save rules.
 
+<img width="940" height="419" alt="image" src="https://github.com/user-attachments/assets/11d6f495-ab25-43d5-ab52-e0570369f460" />
+
+
 Verify Internet Gateway and route table configuration.
+
+<img width="940" height="419" alt="image" src="https://github.com/user-attachments/assets/54d356af-f372-431f-abc2-80d6c4d50d5f" />
+
+#### Steps to Attach an Elastic IP via AWS Console
+1. Allocate the IP:
+
+Log in to the AWS Management Console.
+
+Navigate to EC2 > Network & Security > Elastic IPs.
+
+Click Allocate Elastic IP address.
+
+Choose the Amazon pool and click Allocate.
+
+2. Associate the IP with the Node:
+
+Select the newly created Elastic IP from the list.
+
+Click Actions > Associate Elastic IP address.
+
+Resource type: Select "Instance".
+
+Instance: Search for and select your master-node (Control Plane).
+
+Private IP address: Select the internal IP of the master node.
+
+Click Associate.
+
+3. Update Security Groups:
+
+Ensure the Security Group attached to your Control Plane allows traffic on port 6443 (Kubernetes API) and your NodePorts (like the one for Argo CD or SonarQube) from your specific Elastic IP or your local machine's IP.
+<img width="940" height="418" alt="image" src="https://github.com/user-attachments/assets/2b51200a-7d4f-4c13-a5e6-b59ec0d31dd7" />
+
+
+
+
+
 
 
