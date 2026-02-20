@@ -254,6 +254,246 @@ sudo apt-mark hold kubelet kubeadm kubectl
 #### PART 2 – CONTROL PLANE SETUP
 Now SSH into control plane only.
 
+##### Step 7 – Initialize Cluster
+Run:
+```
+sudo kubeadm init --node-name my-master-node --pod-network-cidr=10.244.0.0/16
+```
+You see something like below: Copy this on notepade we use it later.
+```
+⚠ This will take 2–3 minutes.
+After success, you will see:
+kubeadm join <IP> --token <token> ...
+⚠ Copy that join command somewhere safe.
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join <control-plane-ip>:6443 --token <token> \
+        --discovery-token-ca-cert-hash sha256:<hash>
+```
+##### Step 8 – Configure kubectl Access
+Run:
+```
+mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
+Test:
+```
+kubectl get nodes
+```
+You should see control-plane in NotReady state. 
+
+That’s normal.
+
+#### PART 3 – Install CNI (Calico)
+On control plane only:
+```
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/calico.yaml
+```
+Wait 1–2 minutes.
+
+Check:
+```
+kubectl get pods -n kube-system
+```
+All calico pods should be Running.
+
+Now check nodes:
+```
+kubectl get nodes
+```
+Control plane should become:
+
+Ready
+
+#### PART 4 – Join Worker Nodes
+SSH into Worker 1.
+
+Paste the join command copied earlier:
+
+Example:
+```
+sudo kubeadm join <control-plane-ip>:6443 --token <token> \
+    --discovery-token-ca-cert-hash sha256:<hash> \
+    --node-name worker-01
+```
+Do same on Worker 2.
+
+#### PART 5 – Verify Cluster
+Go back to control plane.
+
+Run:
+```
+kubectl get nodes
+```
+You should see:
+```
+control-plane   Ready
+worker-01        Ready
+worker-02        Ready
+```
+#### PART 6 – Remove Control Plane Taint (If you want to schedule pods on your control plane-Do NOT remove taint in Production)
+If you want to allow pods on control plane:
+```
+kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+```
+(Production: Do NOT remove taint)
+
+### PHASE 4 – Install Monitoring Stack
+
+#### STEP 1 – Install Helm (On Control Plane Only)
+Download Helm:
+```
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+```
+Verify:
+```
+helm version
+```
+You should see Helm version output.
+
+#### STEP 2 – Add Prometheus Community Repo
+```
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+```
+Update repo:
+```
+helm repo update
+```
+#### STEP 3 – Create Monitoring Namespace
+Better practice (production style):
+```
+kubectl create namespace monitoring
+```
+#### STEP 4 – Install kube-prometheus-stack
+Now install:
+```
+helm install monitoring prometheus-community/kube-prometheus-stack -n monitoring
+```
+Wait 2–3 minutes.
+
+#### STEP 5 – Verify Installation
+Check pods:
+```
+kubectl get pods -n monitoring
+```
+You should see:
+```
+•	monitoring-kube-prometheus-prometheus
+•	monitoring-grafana
+•	monitoring-alertmanager
+•	monitoring-kube-state-metrics
+•	node-exporter pods
+```
+All should eventually be:
+
+Running
+
+#### STEP 6 – Check Services
+```
+kubectl get svc -n monitoring
+```
+You will see:
+```
+monitoring-grafana
+monitoring-kube-prometheus-prometheus
+```
+
+#### STEP 7 - Change the Service to NodePort
+```
+kubectl patch svc monitoring-grafana -n monitoring -p '{"spec": {"type": "NodePort"}}'
+```
+Find the assigned port
+```
+kubectl get svc -n monitoring monitoring-grafana
+```
+Access UI:
+```
+http://<MASTER_ELASTIC_IP>:<Port>
+```
+#### STEP 8 - Login in Grafana
+```
+Username: admin
+```
+Password
+```
+kubectl get secret -n monitoring monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+```
+<img width="940" height="455" alt="image" src="https://github.com/user-attachments/assets/a5f45c27-b6bc-47cb-a627-2a41e809cac6" />
+
+Verify Metrics
+
+Inside Grafana:
+
+Go to:
+
+Dashboards → Browse
+
+You should see:
+
+•	Kubernetes / Compute Resources
+•	Node Exporter dashboards
+•	Cluster monitoring dashboards
+
+#### STEP 9 - Change Prometheus to NodePort
+Run this command on your master-node to permanently switch the service type:
+```
+kubectl patch svc monitoring-kube-prometheus-prometheus -n monitoring -p '{"spec": {"type": "NodePort"}}'
+```
+Identify the Permanent Port
+
+Now, check your services again to find the newly assigned port:
+```
+kubectl get svc -n monitoring monitoring-kube-prometheus-prometheus
+```
+Access the Prometheus Dashboard
+
+Open your browser and enter the following URL:
+```
+http://<control-plane-ip>:<port>
+```
+Prometheus Dashboard:
+
+<img width="940" height="472" alt="image" src="https://github.com/user-attachments/assets/50a7d2ed-9972-4df9-a0ba-531b64297e47" />
+
+#### STEP 10 - Add Promethesu Data Source in Grafana
+
+<img width="940" height="455" alt="image" src="https://github.com/user-attachments/assets/a842591e-df57-4211-b722-cb35c21fd902" />
+
+Add Data Source Prometheus:
+
+<img width="940" height="472" alt="image" src="https://github.com/user-attachments/assets/80ea3c5e-17cb-4f40-a62f-7c7a2f1b5e30" />
+
+In Connection Paste Prometheus URL:
+
+<img width="940" height="485" alt="image" src="https://github.com/user-attachments/assets/73b4a337-0ea9-424e-8645-2b81a3eea53e" />
+
+Save and Test
+
+<img width="940" height="479" alt="image" src="https://github.com/user-attachments/assets/bf94bf7a-988c-4634-ad77-8cb20efe1a37" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
