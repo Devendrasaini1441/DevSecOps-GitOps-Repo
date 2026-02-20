@@ -86,4 +86,31 @@ DevSecOps-GitOps-Repo/
  ├── service.yaml
  ├── ingress.yaml
 ```
+## 🧱 Detailed Implementation Guide
+
+### PHASE 1 – Infrastructure Setup (AWS)
+Launch EC2 instances:
+
+1 Control Plane (t3.medium)
+2 Worker Nodes (t3.small)
+
+Configure Security Groups:
+1. 22 (SSH)
+2. 6443 (Kubernetes API)
+3. 30000-32767 (NodePort)
+4. 80, 443 (Ingress)
+
+Add the "Self-Referencing" Rule
+1.	Go to the EC2 Dashboard > Security Groups.
+2.	Select the Security Group that is attached to all your nodes.
+3.	Click on the Inbound rules tab and click Edit inbound rules.
+4.	Click Add rule and set it up as follows:
+o	Type: All traffic
+o	Protocol: All
+o	Port range: 0 - 65535
+o	Source: Click the search box and select the ID of the current Security Group (e.g., search for sg- and pick the one you are currently editing).
+5.	Click Save rules.
+
+Verify Internet Gateway and route table configuration.
+
 
