@@ -165,6 +165,101 @@ Kubernetes will fail if swap is enabled.
 ```
 sudo swapoff -a
 ```
+Make it permanent:
+```
+sudo sed -i '/ swap / s/^/#/' /etc/fstab
+```
+Verify:
+```
+free -h
+```
+Swap should show 0.
+
+##### Step 3 – Install containerd
+```
+sudo apt install -y containerd
+```
+
+Create config:
+```
+sudo mkdir -p /etc/containerd
+sudo containerd config default | sudo tee /etc/containerd/config.toml
+```
+
+Edit file:
+```
+sudo nano /etc/containerd/config.toml
+```
+Find: Search= ctrl+W, in feild serch for ```runc.options``` 
+```
+SystemdCgroup = false
+```
+Change to:
+```
+SystemdCgroup = true
+```
+Save and exit.
+
+Restart containerd:
+```
+sudo systemctl restart containerd
+sudo systemctl enable containerd
+```
+##### Step 4 – Enable Required Kernel Modules
+```
+sudo modprobe overlay
+sudo modprobe br_netfilter
+```
+Make permanent:
+```
+cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
+```
+##### Step 5 – Enable Networking Settings
+```
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+EOF
+```
+Apply:
+```
+sudo sysctl --system
+```
+##### Step 6 – Install Kubernetes Components
+Add Kubernetes repo:
+```
+sudo apt install -y apt-transport-https ca-certificates curl
+sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /usr/share/keyrings/kubernetes-archive-keyring.gpg
+echo 'deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+```
+
+Update:
+```
+sudo apt update
+```
+
+Install:
+```
+sudo apt install -y kubelet kubeadm kubectl
+```
+Hold versions:
+```
+sudo apt-mark hold kubelet kubeadm kubectl
+```
+
+#### PART 2 – CONTROL PLANE SETUP
+Now SSH into control plane only.
+
+
+
+
+
+
+
 
 
 
