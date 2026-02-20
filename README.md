@@ -68,3 +68,22 @@ Core Principles:
 1. Prometheus
 2. Grafana (kube-prometheus-stack)
 
+integration
+
+## 📦 Repository Structure
+### Application Repository:- https://github.com/Devendrasaini1441/DevSecOps-GitOps-App.git
+```
+DevSecOps-GitOps-App/
+ ├── src/
+ ├── Dockerfile
+ ├── .github/workflows/ci.yml
+```
+
+### GitOps Repository:- https://github.com/Devendrasaini1441/DevSecOps-GitOps-App.git
+```
+DevSecOps-GitOps-Repo/
+ ├── deployment.yaml
+ ├── service.yaml
+ ├── ingress.yaml
+```
+
